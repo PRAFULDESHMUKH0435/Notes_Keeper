@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_hive/Utils/tasklist.dart';
 import 'package:hive/hive.dart';
@@ -11,15 +10,25 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  HelperFunctions helper = HelperFunctions();
 
-  static TextEditingController _taskcontroller = TextEditingController();
+
+
+  @override
+  void initState()  {
+    // TODO: implement initState
+    super.initState();
+    checkdata();
+  }
+
+  HelperFunctions helper = HelperFunctions();
+  static final TextEditingController _taskcontroller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop:()=>_onbackpressed(context),
       child: Scaffold(
+        ///APPBAR
         appBar: AppBar(
           elevation: 0,
           title: Text('Notes Keeper'),
@@ -41,8 +50,8 @@ class _HomePageState extends State<HomePage> {
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
               itemBuilder: (context,index){
                 return TaskCard(
-                  id: (TaskList.tasklist.length),
-                  taskname: TaskList.tasklist[index],
+                  id: (TaskList.tasklist[index][0]),
+                  taskname: TaskList.tasklist[index][1],
                 );
               }),
         ),
@@ -79,7 +88,7 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     OutlinedButton(onPressed:(){
-                       savedata(_taskcontroller.text);
+                       ADDDATA(_taskcontroller.text,TaskList.tasklist.length);
                     }, child: Text('Add')),
                     SizedBox(width: 10,),
                     OutlinedButton(onPressed: (){
@@ -114,19 +123,31 @@ class _HomePageState extends State<HomePage> {
     return exitapp?? false;
   }
 
-  void savedata(String text) async {
-        var box = await   Hive.openBox('mydatabase');
-        print('\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\INDEX  IS ${TaskList.tasklist.length}');
-        TaskList.tasklist.add(text);
-        // box.put('MYDATABASE',TaskList.tasklist);
-        print('BOX DATA IS ${box.get('MYDATABASE')}');
-        print('TASKLIST LENGTH IS ${TaskList.tasklist.length}');
-        print('TASKLIST LENGTH  IS :${TaskList.tasklist.length}  AND  DATA IS $text');
-        print('////////////////////////////////////////////////////////');
-        _HomePageState._taskcontroller.clear();
-        Navigator.of(context).pop(true);
-        setState(() { });
+  Future ADDDATA(String text,int id) async {
 
+    var box = Hive.box('MyBox');
+    TaskList.tasklist.add([id,text]);
+    box.put('MYKEY', TaskList.tasklist);
+    List mylist = box.get('MYKEY');
+    print('TASKLIST IS $mylist\n');
+    _taskcontroller.clear();
+    Navigator.of(context).pop(true);
+    setState(() {});
+  }
+
+   Future checkdata() async{
+    var box = Hive.box('MyBox');
+    List mylist =await box.get('MYKEY');
+    /// IF ITS FIRST TIME
+    if(mylist.length==0){
+      print('ITS FIRST TIME USER');
+      print('DATA NOT EXISTS');
+      TaskList.tasklist= TaskList.tasklist;
+    }else{
+      print('DATA ALREADY EXISTS');
+      TaskList.tasklist = mylist;
+      print(mylist);
+    }
   }
 }
 
