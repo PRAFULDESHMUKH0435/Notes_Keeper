@@ -116,15 +116,16 @@ class _HomePageState extends State<HomePage> {
 
   void savedata(String text) async {
         var box = await   Hive.openBox('mydatabase');
-        print('INDEX  IS ${TaskList.tasklist.length}');
+        print('\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\INDEX  IS ${TaskList.tasklist.length}');
         TaskList.tasklist.add(text);
+        // box.put('MYDATABASE',TaskList.tasklist);
+        print('BOX DATA IS ${box.get('MYDATABASE')}');
         print('TASKLIST LENGTH IS ${TaskList.tasklist.length}');
         print('TASKLIST LENGTH  IS :${TaskList.tasklist.length}  AND  DATA IS $text');
+        print('////////////////////////////////////////////////////////');
         _HomePageState._taskcontroller.clear();
         Navigator.of(context).pop(true);
-        setState(() {
-
-        });
+        setState(() { });
 
   }
 }
